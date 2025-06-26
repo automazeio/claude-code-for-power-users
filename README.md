@@ -1,4 +1,27 @@
-# The Complete Hands-On Guide to Claude Code for Power Users
+# Hands-On Guide to Claude Code for Power Users
+
+💫 Share this guide with your network on [X/Twitter](https://x.com/share?text=The+complete+hands-on+guide+to+Claude+Code+for+power+users&url=https%3A%2F%2Fgithub.com%2Fautomazeio%2Fclaude-code-for-power-users&via=automazeio) or [LinkedIn](https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fgithub.com%2Fautomazeio%2Fclaude-code-for-power-users&title=The+complete+hands-on+guide+to+Claude+Code+for+power+users&source=automaze.io)
+
+
+## Introduction
+
+The software development landscape has fundamentally shifted. While most developers are still using AI as an enhanced autocomplete tool, a small group of power users has discovered how to leverage Claude Code as a true development partner – one capable of architectural thinking, complex problem-solving, and autonomous execution of multi-step workflows.
+
+This guide represents the collective wisdom of developers who have moved beyond basic prompting to create sophisticated development workflows that can 10x productivity. Whether you're managing a startup's technical roadmap, leading an engineering team, or building complex systems as a solo developer, Claude Code can become your most valuable technical teammate – but only if you know how to unlock its full potential.
+
+The difference between a novice Claude Code user and a power user isn't just about knowing more commands – it's about understanding how to structure your development environment, configure intelligent context, and design workflows that leverage Claude's reasoning capabilities. Most developers use maybe 20% of Claude Code's potential because they treat it like a chatbot. This guide will show you how to use it like a senior technical architect.
+
+By the end of this guide, you'll understand how to set up enterprise-grade development workflows, automate complex technical decisions, and scale your development capacity in ways that weren't possible just a few years ago. Let's dive in.
+
+---
+
+> [!NOTE]
+> #### This guide was written by Claude itself, under the guidance of the Automaze team
+> Automaze provides expert technical leadership and strategic guidance to help companies build exceptional software products. Lead by [Ran Aroussi](https://x.com/aroussi), our team of experienced technical leads and software architects partner with startups and growing companies to accelerate development, optimize engineering practices, and scale technical teams effectively.
+>
+> Learn more at [automaze.io](https://automaze.io) and follow us on 𝕏 [@automazeio](https://x.com/automazeio).
+
+---
 
 ## Table of Contents
 1. [Understanding Claude Code: Beyond Basic AI Assistance](#understanding-claude-code-beyond-basic-ai-assistance)
@@ -1199,4 +1222,8 @@ claude --dry-run "preview changes only"
 
 ---
 
-*Remember: Claude Code is not just an autocomplete tool—it's a senior developer who can think, plan, and execute complex architectural decisions. The more context and structure you provide, the better it performs.*
+*Remember: Claude Code is not just an autocomplete tool – it's a senior developer who can think, plan, and execute complex architectural decisions. The more context and structure you provide, the better it performs.*
+
+---
+
+💫  if you made it this far, please take another 30 seconds of your time, and share this guide with your network on [X/Twitter](https://x.com/share?text=The+complete+hands-on+guide+to+Claude+Code+for+power+users&url=https%3A%2F%2Fgithub.com%2Fautomazeio%2Fclaude-code-for-power-users&via=automazeio) or [LinkedIn](https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fgithub.com%2Fautomazeio%2Fclaude-code-for-power-users&title=The+complete+hands-on+guide+to+Claude+Code+for+power+users&source=automaze.io)
