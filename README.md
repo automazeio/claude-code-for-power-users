@@ -35,6 +35,8 @@ By the end of this guide, you'll understand how to set up enterprise-grade devel
 9. [Security & Best Practices](#security--best-practices)
 10. [Troubleshooting & Advanced Debugging](#troubleshooting--advanced-debugging)
 11. [Enterprise & Team Patterns](#enterprise--team-patterns)
+12. [Tips and Tricks](#tips-and-tricks)
+13. [Quick Reference & Cheat Sheet](#quick-reference-and-cheat-sheet)
 
 ---
 
@@ -1161,7 +1163,51 @@ Update our CLAUDE.md files across all projects with shared learnings.
 "
 ```
 
-## Quick Reference & Cheat Sheet
+---
+
+
+## Tips and Tricks
+
+### Audio Notifications for Task Completion
+
+**Cursor Code tip for Mac users:**
+
+Add this to your CLAUDE.md file for hands-free productivity:
+
+```markdown
+## Audio Notifications
+Whenever you're done with a task or need my attention to approve something, run the following command on the terminal:
+`say "Yo yo yo!"`
+```
+
+This simple trick transforms your development workflow by providing audio alerts when Claude completes long-running tasks, allowing you to:
+- Work on other tasks while Claude processes complex requests
+- Get notified immediately when manual approval is needed
+- Avoid constantly checking the terminal for completion status
+- Maintain focus while Claude handles background work
+
+**Why this works so well:**
+- Mac's built-in `say` command provides clear, immediate feedback
+- Works even when your terminal is in the background
+- No additional dependencies or setup required
+- Can be customized with different phrases or voices
+
+**Advanced variations:**
+```bash
+Whenever you're done with a task or need my attention to approve something, run the one of the following commands on the terminal, based on the event type:
+
+say "Task completed successfully"
+say "I need your confirmation"
+say "Ready for review" --voice=Samantha
+say "Error encountered - check output" --rate=150
+
+# Integration with system notifications
+osascript -e 'display notification "Claude task finished" with title "Development Update"'
+```
+
+---
+
+## Quick Reference and Cheat Sheet
 
 ### Essential Commands
 ```bash
