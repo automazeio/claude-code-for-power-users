@@ -2,7 +2,6 @@
 
 💫 Share this guide with your network on [X/Twitter](https://x.com/share?text=The+complete+hands-on+guide+to+Claude+Code+for+power+users&url=https%3A%2F%2Fgithub.com%2Fautomazeio%2Fclaude-code-for-power-users&via=automazeio) or [LinkedIn](https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fgithub.com%2Fautomazeio%2Fclaude-code-for-power-users&title=The+complete+hands-on+guide+to+Claude+Code+for+power+users&source=automaze.io)
 
-
 ## Introduction
 
 The software development landscape has fundamentally shifted. While most developers are still using AI as an enhanced autocomplete tool, a small group of power users has discovered how to leverage Claude Code as a true development partner – one capable of architectural thinking, complex problem-solving, and autonomous execution of multi-step workflows.
@@ -24,19 +23,21 @@ By the end of this guide, you'll understand how to set up enterprise-grade devel
 ---
 
 ## Table of Contents
-1. [Claude Code: Beyond the Basica](#understanding-claude-code-beyond-the-basics)
+1. [Claude Code: Beyond the Basics](#understanding-claude-code-beyond-the-basics)
 2. [Essential Setup & Configuration](#essential-setup--configuration)
 3. [Mastering the CLAUDE.md File](#mastering-the-claudemd-file)
 4. [Advanced Context Management](#advanced-context-management)
 5. [Professional Workflows & Automation](#professional-workflows--automation)
 6. [Power User Features & Techniques](#power-user-features--techniques)
-7. [Integration Patterns & MCP Servers](#integration-patterns--mcp-servers)
-8. [Performance Optimization & Scaling](#performance-optimization--scaling)
-9. [Security & Best Practices](#security--best-practices)
-10. [Troubleshooting & Advanced Debugging](#troubleshooting--advanced-debugging)
-11. [Enterprise & Team Patterns](#enterprise--team-patterns)
-12. [Tips and Tricks](#tips-and-tricks)
-13. [Quick Reference & Cheat Sheet](#quick-reference-and-cheat-sheet)
+7. [Custom Commands & Slash Commands](#custom-commands--slash-commands)
+8. [Integration Patterns & MCP Servers](#integration-patterns--mcp-servers)
+9. [Hooks & Automation](#hooks--automation)
+10. [Performance Optimization & Scaling](#performance-optimization--scaling)
+11. [Security & Best Practices](#security--best-practices)
+12. [Troubleshooting & Advanced Debugging](#troubleshooting--advanced-debugging)
+13. [Enterprise & Team Patterns](#enterprise--team-patterns)
+14. [Tips and Tricks](#tips-and-tricks)
+15. [Quick Reference & Cheat Sheet](#quick-reference-and-cheat-sheet)
 
 ---
 
@@ -89,15 +90,26 @@ Rather than just responding to prompts, Claude Code can:
 
 **Installation Process:**
 ```bash
-# Method 1: Official installer (recommended)
-curl -fsSL https://claude.ai/install | sh
+# Method 1: NPM (Official & Recommended)
+npm install -g @anthropic-ai/claude-code
 
-# Method 2: Package manager
-npm install -g @anthropic/claude-code
+# Method 2: Homebrew (macOS & Linux)
+brew install anthropic/tap/claude-code
+
+# Method 3: Arch Linux AUR
+yay -S claude-code        # or paru -S claude-code
+
+# Method 4: Docker (containerized)
+docker pull ghcr.io/rchgrav/claudebox:latest
+
+# Method 5: Windows via WSL (Anthropic-recommended)
+# Enable WSL 2, install Ubuntu, then:
+sudo apt update && sudo apt install -y nodejs npm
+npm install -g @anthropic-ai/claude-code
 
 # Verify installation
 claude --version
-claude auth status
+claude /doctor
 ```
 
 **Critical First Steps:**
@@ -161,7 +173,15 @@ claude auth login
   "model": "claude-sonnet-4-20250514",
   "temperature": 0.1,
   "max_tokens": 8192,
-  "thinking_budget": "extended",
+  "thinking_budget": "extended",  
+  "theme": "dark-daltonized",
+  "editorMode": "vim",
+  "autoUpdates": true,
+  "verbose": true,
+  "outputFormat": "text",
+  "allowedTools": ["Edit", "View"],
+  "bypassPermissionsModeAccepted": false,
+  "hasCompletedOnboarding": true,
   "auto_save_context": true,
   "workspace_settings": {
     "auto_git_integration": true,
@@ -174,6 +194,27 @@ claude auth login
     "require_confirmation": ["rm", "delete", "drop"]
   }
 }
+```
+
+**Hidden environment variables for power users:**
+```bash
+# Performance optimization
+export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
+export DISABLE_NON_ESSENTIAL_MODEL_CALLS=1
+export ENABLE_BACKGROUND_TASKS=1
+export FORCE_AUTO_BACKGROUND_TASKS=1
+export CLAUDE_CODE_ENABLE_UNIFIED_READ_TOOL=1
+
+# Extended thinking configuration
+export MAX_THINKING_TOKENS=50000
+
+# Privacy settings
+export DISABLE_TELEMETRY=1
+export DISABLE_ERROR_REPORTING=1
+
+# Development and debugging
+export CLAUDE_CODE_DEBUG=1
+export CLAUDE_CODE_VERBOSE_LOGGING=1
 ```
 
 ### IDE Integration Setup
@@ -572,6 +613,27 @@ claude "ultrathink the scalability challenges and provide a comprehensive soluti
 - **think hard**: Security analysis, performance optimization, complex debugging
 - **ultrathink**: System-wide refactoring, critical business logic, high-stakes decisions
 
+**Dev Container "Yolo Mode":**
+
+When working in development containers or isolated environments, you can enable aggressive automation:
+
+```bash
+# In development containers only - bypasses all permission prompts
+claude --dangerously-skip-permissions
+
+# Combined with environment optimization for containers
+export CLAUDE_CODE_CONTAINER_MODE=1
+export BYPASS_ALL_CONFIRMATIONS=1
+
+# Use with caution - only in isolated, disposable environments
+docker run -it --rm \
+  -e ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" \
+  -e CLAUDE_CODE_CONTAINER_MODE=1 \
+  -v "$PWD:/workspace" \
+  claude-dev-container \
+  claude --dangerously-skip-permissions "refactor entire codebase"
+```
+
 ### Subagent Workflows
 
 ```bash
@@ -619,36 +681,40 @@ Analyze our performance bottlenecks and create an optimization strategy.
 "
 ```
 
-### Custom Slash Commands
+---
 
-**Creating reusable workflows:**
+## Custom Commands & Slash Commands
+
+### Understanding Custom Slash Commands
+
+Custom slash commands are Claude Code's most powerful feature for creating reusable, team-specific workflows. Unlike built-in commands, custom commands let you encode your team's processes, tools, and expertise into repeatable automation.
+
+### Creating Custom Commands
+
+**Command Structure:**
 ```bash
-# .claude/commands/security-audit.md
+# Commands are stored in .claude/commands/
+mkdir -p .claude/commands/
+
+# Create a command file: command-name.md
+touch .claude/commands/security-audit.md
 ```
+
+**Basic Command Template:**
 ```markdown
 # Security Audit Command
 
-Please perform a comprehensive security audit of the current codebase:
+Perform a comprehensive security audit of the current codebase:
 
 ## Authentication & Authorization
 - Review JWT implementation for vulnerabilities
-- Check for proper session management
+- Check for proper session management  
 - Validate RBAC implementation
 
 ## Input Validation
 - Scan for SQL injection vulnerabilities
 - Check XSS prevention measures
 - Validate API input sanitization
-
-## Dependencies
-- Run npm audit and analyze results
-- Check for known vulnerable packages
-- Review third-party service integrations
-
-## Infrastructure
-- Review Docker configurations
-- Check Kubernetes security contexts
-- Validate environment variable handling
 
 ## Output Format
 Provide a prioritized list of findings with:
@@ -661,44 +727,41 @@ Provide a prioritized list of findings with:
 Arguments: $ARGUMENTS (specific areas to focus on)
 ```
 
-**Usage:**
+**Using Custom Commands:**
 ```bash
+# Execute custom commands
 /security-audit api authentication
 /security-audit frontend xss-prevention
+
+# List available custom commands
+/commands
 ```
 
-### Headless Mode for CI/CD
+### Repository Commands
 
-**Automated quality checks:**
+**The commands/ directory in this guide's repository includes:**
+
+**1. `gemini-analyze.md`** - Leverage Google Gemini's 2M token context window for massive codebase analysis
+**2. `ast-grep.md`** - Structural code analysis and pattern matching using AST-Grep
+**3. `security-scan.md`** - Comprehensive security audit workflows
+**4. `performance-audit.md`** - Performance analysis and optimization
+**5. `architecture-review.md`** - System architecture evaluation
+**6. `tech-debt.md`** - Technical debt assessment and prioritization
+
+### Built-in Slash Commands (Reference)
+
+While the focus is on custom commands, here are key built-in commands:
+
+**Essential Commands:**
 ```bash
-# In your CI pipeline
-claude --headless --output-format=json "
-Analyze this PR for:
-- Breaking changes
-- Performance regressions
-- Security issues
-- Code style violations
-
-Return results in JSON format for automated processing.
-" > audit-results.json
-```
-
-**Integration with GitHub Actions:**
-```yaml
-# .github/workflows/claude-review.yml
-name: Claude Code Review
-on: pull_request
-
-jobs:
-  review:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Run Claude Code Review
-      run: |
-        claude --headless "Review this PR and add comments to GitHub" \
-          --github-token=${{ secrets.GITHUB_TOKEN }} \
-          --pr-number=${{ github.event.number }}
+/init                    # Create CLAUDE.md file
+/clear                   # Clear conversation context
+/help                    # Show available commands
+/permissions             # Manage tool permissions
+/memory                  # Edit project memory
+/doctor                  # System health check
+/config                  # Configuration management
+/mcp                     # MCP server management
 ```
 
 ---
@@ -713,12 +776,12 @@ MCP servers extend Claude Code's capabilities by providing access to external sy
 
 **Database Integration:**
 ```json5
-// .mcp.json
+// .mcp.json (project-level) or ~/.claude.json (global)
 {
   "mcpServers": {
-    "database": {
+    "postgres": {
       "command": "npx",
-      "args": ["@modelcontextprotocol/server-postgres"],
+      "args": ["-y", "@modelcontextprotocol/server-postgres"],
       "env": {
         "POSTGRES_CONNECTION_STRING": "postgresql://user:pass@localhost:5432/myapp",
         "ALLOWED_OPERATIONS": ["SELECT", "INSERT", "UPDATE", "DELETE"],
@@ -729,76 +792,78 @@ MCP servers extend Claude Code's capabilities by providing access to external sy
 }
 ```
 
-**Filesystem & Documentation:**
+**Development Tools:**
 ```json5
 {
   "mcpServers": {
     "filesystem": {
       "command": "npx",
-      "args": ["@modelcontextprotocol/server-filesystem"],
-      "args": ["/workspace", "/docs", "/config"],
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/workspace", "/docs"],
       "env": {
-        "ALLOWED_EXTENSIONS": [".js", ".ts", ".json", ".md"],
-        "BLOCKED_PATHS": [".env", "node_modules", ".git"]
+        "ALLOWED_EXTENSIONS": [".js", ".ts", ".json", ".md", ".py"],
+        "BLOCKED_PATHS": [".env", "node_modules", ".git", "*.key"]
       }
     },
+    "git": {
+      "command": "npx", 
+      "args": ["-y", "@modelcontextprotocol/server-git"],
+      "env": {}
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "ghp_your_token_here"
+      }
+    }
+  }
+}
+```
+
+**Documentation & Context:**
+```json5
+{
+  "mcpServers": {
     "context7": {
       "command": "npx", 
-      "args": ["@context7/mcp-server"],
+      "args": ["-y", "@context7/mcp-server"],
       "env": {
         "CACHE_DOCS": "true",
         "AUTO_UPDATE": "daily"
       }
-    }
-  }
-}
-```
-
-### Advanced MCP Server Setups
-
-**Custom Business Logic Server:**
-```javascript
-// mcp-servers/business-logic.js
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-
-const server = new Server({
-  name: 'business-logic-server',
-  version: '1.0.0'
-});
-
-server.setRequestHandler('tools/call', async (request) => {
-  const { name, arguments: args } = request.params;
-  
-  switch(name) {
-    case 'calculate_pricing':
-      return calculatePricing(args);
-    case 'validate_business_rules':
-      return validateBusinessRules(args);
-    case 'get_user_permissions':
-      return getUserPermissions(args);
-  }
-});
-```
-
-**Real-time Development Server:**
-```json5
-{
-  "mcpServers": {
-    "puppeteer": {
-      "command": "npx",
-      "args": ["@modelcontextprotocol/server-puppeteer"],
-      "env": {
-        "HEADLESS": "false",
-        "VIEWPORT_WIDTH": "1920",
-        "VIEWPORT_HEIGHT": "1080"
-      }
     },
-    "sequential-thinking": {
+    "brave-search": {
       "command": "npx",
-      "args": ["@modelcontextprotocol/server-sequential-thinking"]
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": "your_brave_api_key"
+      }
     }
   }
 }
+```
+
+### MCP Server Management
+
+**Essential MCP commands:**
+```bash
+# Interactive MCP setup
+claude mcp
+
+# List configured servers
+claude mcp list
+
+# Add new server
+claude mcp add postgres "npx -y @modelcontextprotocol/server-postgres"
+
+# Remove server
+claude mcp remove postgres
+
+# Restart all servers
+claude mcp restart --all
+
+# Debug MCP issues
+claude --mcp-debug
 ```
 
 ### MCP Server Usage Patterns
@@ -825,6 +890,301 @@ Use Context7 to fetch the latest React 18 patterns and:
 3. Refactor our most complex components
 4. Update our coding standards documentation
 "
+```
+
+---
+
+## Hooks & Automation
+
+### Git Hooks Integration
+
+Claude Code can be integrated into your Git workflow through hooks, enabling automated code analysis, security scanning, and quality checks at critical points in your development process.
+
+### Pre-commit Hooks
+
+**Basic pre-commit security scan:**
+```bash
+#!/bin/bash
+# .git/hooks/pre-commit
+
+# Get staged files
+staged_files=$(git diff --cached --name-only --diff-filter=ACM)
+
+if [ -z "$staged_files" ]; then
+    exit 0
+fi
+
+echo "🔍 Running Claude Code security scan..."
+
+# Analyze staged changes
+analysis=$(echo "$staged_files" | xargs cat | \
+    claude -p "Review these staged changes for security vulnerabilities, performance issues, and code quality problems. Focus on: SQL injection, XSS, authentication issues, and performance anti-patterns." \
+    --allowedTools "View" \
+    --output-format json)
+
+# Check for critical issues
+if echo "$analysis" | jq -e '.severity == "critical"' > /dev/null 2>&1; then
+    echo "❌ Critical security issues found - commit blocked"
+    echo "$analysis" | jq -r '.findings[]'
+    exit 1
+fi
+
+echo "✅ Security scan passed"
+```
+
+### Advanced Hook Use Cases
+
+#### Task Completion Reporting
+
+**Automated task summaries after each session:**
+```json5
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Task completed at $(date). Summary: Claude Code has finished processing.' | tee -a ~/claude_task_log.txt"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+#### Mobile Notification System
+
+**Real-time alerts for critical operations:**
+```json5
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/scripts/ping_mobile.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Mobile notification script with multiple services:**
+```bash
+#!/bin/bash
+# ~/scripts/ping_mobile.sh
+
+TOOL_NAME=$(echo "$1" | jq -r '.tool_name // "unknown tool"')
+MESSAGE="Claude Code needs attention: $TOOL_NAME"
+
+# Option 1: Pushover
+curl -s -X POST "https://api.pushover.net/1/messages.json" \
+  -d "token=$PUSHOVER_APP_TOKEN" \
+  -d "user=$PUSHOVER_USER_KEY" \
+  -d "message=$MESSAGE" \
+  -d "priority=1"
+
+# Option 2: Telegram
+curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+  -d "chat_id=$TELEGRAM_CHAT_ID" \
+  -d "text=$MESSAGE"
+
+# Option 3: Slack
+curl -s -X POST "$SLACK_WEBHOOK_URL" \
+  -H 'Content-type: application/json' \
+  -d "{\"text\":\"$MESSAGE\"}"
+
+# Option 4: macOS local notification
+osascript -e "display notification \"$MESSAGE\" with title \"Claude Code Alert\""
+```
+
+#### Automatic Code Formatting
+
+**Post-task file formatting for multiple languages:**
+```json5
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/scripts/format_files.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Comprehensive formatting script:**
+```bash
+#!/bin/bash
+# ~/scripts/format_files.sh
+
+# Get file path from tool response
+FILE_PATH=$(echo "$1" | jq -r '.tool_input.path // .tool_input.file_path // ""')
+
+if [ -n "$FILE_PATH" ] && [ -f "$FILE_PATH" ]; then
+  echo "Formatting: $FILE_PATH"
+  
+  case "$FILE_PATH" in
+    *.js|*.ts|*.jsx|*.tsx)
+      # JavaScript/TypeScript
+      if command -v prettier >/dev/null; then
+        npx prettier --write "$FILE_PATH"
+      fi
+      if command -v eslint >/dev/null; then
+        npx eslint --fix "$FILE_PATH" 2>/dev/null || true
+      fi
+      ;;
+    *.go)
+      # Go
+      gofmt -w "$FILE_PATH"
+      if command -v goimports >/dev/null; then
+        goimports -w "$FILE_PATH"
+      fi
+      ;;
+    *.py)
+      # Python
+      if command -v black >/dev/null; then
+        black "$FILE_PATH"
+      fi
+      if command -v isort >/dev/null; then
+        isort "$FILE_PATH"
+      fi
+      ;;
+    *.rs)
+      # Rust
+      rustfmt "$FILE_PATH"
+      ;;
+    *.java)
+      # Java
+      if command -v google-java-format >/dev/null; then
+        google-java-format --replace "$FILE_PATH"
+      fi
+      ;;
+    *.c|*.cpp|*.h|*.hpp)
+      # C/C++
+      if command -v clang-format >/dev/null; then
+        clang-format -i "$FILE_PATH"
+      fi
+      ;;
+    *.json)
+      # JSON
+      if command -v jq >/dev/null; then
+        jq . "$FILE_PATH" > "/tmp/formatted.json" && mv "/tmp/formatted.json" "$FILE_PATH"
+      fi
+      ;;
+    *.md)
+      # Markdown
+      if command -v prettier >/dev/null; then
+        npx prettier --write "$FILE_PATH"
+      fi
+      ;;
+    *)
+      echo "No formatter configured for $FILE_PATH"
+      ;;
+  esac
+  
+  echo "Formatting completed for $FILE_PATH"
+fi
+```
+
+### GitHub Actions Integration
+
+**Comprehensive CI/CD workflow:**
+```yaml
+name: Claude Code Analysis
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main]
+
+jobs:
+  claude-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Security Analysis
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          claude --dangerously-skip-permissions \
+            -p "Perform comprehensive security analysis of this PR. Check for vulnerabilities, exposed secrets, and security anti-patterns." \
+            --output-format json > security-report.json
+
+      - name: Performance Analysis
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          claude --dangerously-skip-permissions \
+            -p "Analyze code changes for performance issues, memory leaks, and optimization opportunities." \
+            --output-format json > performance-report.json
+
+      - name: Comment PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const securityReport = JSON.parse(fs.readFileSync('security-report.json', 'utf8'));
+            const performanceReport = JSON.parse(fs.readFileSync('performance-report.json', 'utf8'));
+            
+            const comment = `## 🤖 Claude Code Analysis
+            
+            ### 🔒 Security Analysis
+            ${securityReport.summary || 'No critical issues found'}
+            
+            ### ⚡ Performance Analysis  
+            ${performanceReport.summary || 'No performance issues detected'}
+            
+            *Generated by Claude Code in CI/CD*`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+```
+
+### Hook Configuration Management
+
+**Setting up hooks through Claude Code:**
+```bash
+# Interactive hook configuration
+claude
+/hooks
+
+# Follow prompts to:
+# 1. Select hook event (Stop, PreToolUse, PostToolUse)
+# 2. Add matcher pattern
+# 3. Add hook command
+# 4. Choose scope (project or user settings)
+# 5. Save with Esc
 ```
 
 ---
@@ -1165,19 +1525,25 @@ Update our CLAUDE.md files across all projects with shared learnings.
 
 ---
 
-
 ## Tips and Tricks
 
 ### Audio Notifications for Task Completion
 
-**Cursor Code tip for Mac users:**
+**Claude Code tip for Mac users:**
 
 Add this to your CLAUDE.md file for hands-free productivity:
 
 ```markdown
 ## Audio Notifications
-Whenever you're done with a task or need my attention to approve something, run the following command on the terminal:
-`say "Yo yo yo!"`
+Whenever you're done with a task or need my attention to approve something, run one of the following commands on the terminal, based on the event type:
+
+`say "Task completed successfully"`
+`say "I need your confirmation"`  
+`say "Ready for review" --voice=Samantha`
+`say "Error encountered - check output" --rate=150`
+
+# Integration with system notifications
+`osascript -e 'display notification "Claude task finished" with title "Development Update"'`
 ```
 
 This simple trick transforms your development workflow by providing audio alerts when Claude completes long-running tasks, allowing you to:
@@ -1192,18 +1558,7 @@ This simple trick transforms your development workflow by providing audio alerts
 - No additional dependencies or setup required
 - Can be customized with different phrases or voices
 
-**Advanced variations:**
-```bash
-Whenever you're done with a task or need my attention to approve something, run the one of the following commands on the terminal, based on the event type:
-
-say "Task completed successfully"
-say "I need your confirmation"
-say "Ready for review" --voice=Samantha
-say "Error encountered - check output" --rate=150
-
-# Integration with system notifications
-osascript -e 'display notification "Claude task finished" with title "Development Update"'
-```
+Thank me later! :)
 
 ---
 
@@ -1212,51 +1567,123 @@ osascript -e 'display notification "Claude task finished" with title "Developmen
 ### Essential Commands
 ```bash
 /init                           # Create CLAUDE.md (CRITICAL)
-/clear                         # Reset context
-/permissions                   # Configure tool access
-# [pattern]                    # Add to CLAUDE.md
-/project:command-name args     # Custom commands
+/clear                          # Reset context
+/permissions                    # Configure tool access
+/memory                         # Edit project memory
+/doctor                         # System health check
+/config                         # Configuration management
+/mcp                           # MCP server management
+/hooks                         # Configure automation hooks
+# [pattern]                     # Add to CLAUDE.md
 ```
 
-### Power User Shortcuts
+### Custom Commands
 ```bash
-# Extended thinking
+/security-audit [scope]         # Comprehensive security analysis
+/performance-audit [scope]      # Performance bottleneck analysis  
+/architecture-review [scope]    # System architecture evaluation
+/gemini-analyze [focus]         # Large context analysis with Gemini
+/ast-analyze [patterns]         # AST-Grep structural analysis
+/tech-debt [priority]           # Technical debt assessment
+```
+
+### Power User CLI Options
+```bash
+# Extended thinking modes
 claude "think hard about [complex problem]"
 claude "ultrathink [critical decision]"
 
-# Context management
+# Context management  
 claude --scope="src/auth" "focus on authentication"
 claude --exclude="tests,docs" "analyze production code"
+claude --add-dir="../lib,../shared" "include related projects"
 
-# Automation
-claude --headless "automated task" > output.json
-claude --dry-run "preview changes only"
+# Output control
+claude --output-format=json "structured analysis"
+claude --output-format=stream-json "long operation"
+claude -p "quick query" # Print mode (one-shot)
+
+# Session management
+claude --session="frontend" "work on UI components"
+claude --resume="backend" # Resume named session
+claude -c # Continue last session
+
+# Security and permissions
+claude --allowedTools "Edit,View,mcp__git__*"
+claude --dangerously-skip-permissions # Containers only!
+claude --confirmation-required "git push origin main"
 ```
 
-### Workflow Triggers
+### Essential Environment Variables
 ```bash
-"plan before implementing"     # Strategic planning mode
-"test-driven development"      # TDD workflow
-"security-first approach"      # Security-focused development
-"performance optimization"     # Performance-focused analysis
-"use subagents to verify"     # Multi-agent validation
+# Core configuration
+export ANTHROPIC_API_KEY="sk-ant-api03-xxx"
+
+# Performance optimization
+export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
+export DISABLE_NON_ESSENTIAL_MODEL_CALLS=1
+export ENABLE_BACKGROUND_TASKS=1
+export CLAUDE_CODE_ENABLE_UNIFIED_READ_TOOL=1
+
+# Extended thinking
+export MAX_THINKING_TOKENS=50000
+
+# Privacy and security
+export DISABLE_TELEMETRY=1
+export DISABLE_ERROR_REPORTING=1
 ```
 
 ### MCP Server Quick Setup
 ```json5
 {
   "mcpServers": {
-    "database": { "command": "npx", "args": ["@modelcontextprotocol/server-postgres"] },
-    "filesystem": { "command": "npx", "args": ["@modelcontextprotocol/server-filesystem", "/workspace"] },
-    "context7": { "command": "npx", "args": ["@context7/mcp-server"] },
-    "puppeteer": { "command": "npx", "args": ["@modelcontextprotocol/server-puppeteer"] }
+    "postgres": { 
+      "command": "npx", 
+      "args": ["-y", "@modelcontextprotocol/server-postgres"] 
+    },
+    "filesystem": { 
+      "command": "npx", 
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/workspace"] 
+    },
+    "context7": { 
+      "command": "npx", 
+      "args": ["-y", "@context7/mcp-server"] 
+    },
+    "github": { 
+      "command": "npx", 
+      "args": ["-y", "@modelcontextprotocol/server-github"] 
+    }
   }
 }
 ```
 
+### Workflow Triggers
+```bash
+"plan before implementing"      # Strategic planning mode
+"test-driven development"       # TDD workflow
+"security-first approach"       # Security-focused development  
+"performance optimization"      # Performance-focused analysis
+"use subagents to verify"      # Multi-agent validation
+"think hard about"             # Extended reasoning mode
+"ultrathink"                   # Maximum analysis budget
+```
+
+### Git Hooks Integration
+```bash
+# Pre-commit security scan
+echo '#!/bin/bash
+claude /security-audit --scope=staged-files' > .git/hooks/pre-commit
+chmod +x .git/hooks/pre-commit
+
+# Post-commit documentation update
+echo '#!/bin/bash  
+claude "Update documentation for recent changes"' > .git/hooks/post-commit
+chmod +x .git/hooks/post-commit
+```
+
 ### Best Practices Checklist
 - ✅ Always run `/init` to create CLAUDE.md
-- ✅ Use Max Plan for unlimited productivity
+- ✅ Use Max Plan for unlimited productivity  
 - ✅ Set up MCP servers for your tech stack
 - ✅ Configure IDE extension for real-time feedback
 - ✅ Use extended thinking for complex decisions
@@ -1264,7 +1691,10 @@ claude --dry-run "preview changes only"
 - ✅ Clear context between unrelated tasks
 - ✅ Be specific and structured in requests
 - ✅ Use multiple Claude instances for parallel work
-- ✅ Automate repetitive tasks with headless mode
+- ✅ Automate repetitive tasks with custom commands
+- ✅ Set up hooks for automated quality checks
+- ✅ Use environment variables for sensitive configuration
+- ✅ Regular security audits of permissions and configuration
 
 ---
 
